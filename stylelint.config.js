@@ -9,5 +9,6 @@ export default {
     'stylelint-config-standard',
     'stylelint-config-recess-order',
     'stylelint-config-astro',
+    'stylelint-config-tailwindcss',
   ],
 };

@@ -1,0 +1,37 @@
+---
+import type { CollectionEntry } from 'astro:content';
+
+import Card from '@components/Card';
+import Footer from '@components/Footer.astro';
+import Header from '@components/Header.astro';
+import Pagination from '@components/Pagination.astro';
+import { SITE } from '@config';
+import Layout from '@layouts/Layout.astro';
+import Main from '@layouts/Main.astro';
+
+export interface Props {
+  currentPage: number;
+  totalPages: number;
+  paginatedPosts: CollectionEntry<'blog'>[];
+}
+
+const { currentPage, totalPages, paginatedPosts } = Astro.props;
+---
+
+<Layout title={`文章列表 | ${SITE.title}`}>
+  <Header activeNav='posts' />
+  <Main pageTitle='🔖 文章列表' pageDesc='我发布过的所有文章'>
+    <ul>
+      {paginatedPosts.map(({ data, slug }) => <Card href={`/posts/${slug}/`} frontmatter={data} />)}
+    </ul>
+  </Main>
+
+  <Pagination
+    {currentPage}
+    {totalPages}
+    prevUrl={`/posts${currentPage - 1 !== 1 ? '/' + (currentPage - 1) : ''}/`}
+    nextUrl={`/posts/${currentPage + 1}/`}
+  />
+
+  <Footer noMarginTop={totalPages > 1} />
+</Layout>

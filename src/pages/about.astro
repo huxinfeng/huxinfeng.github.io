@@ -1,0 +1,33 @@
+---
+import AboutLayout from '@layouts/AboutLayout.astro';
+
+import { SITE } from '@config';
+
+const workingYears = Math.floor(new Date().getFullYear() - new Date('2021-11-01').getFullYear());
+---
+
+<AboutLayout frontmatter={{ title: `👨🏻‍💻 ${SITE.author}` }}>
+  我是一名前端开发工程师，方向是图形领域（主要做2D游戏、数据点云标注平台、数据可视化监控平台），正在努力成为一名全栈开发工程师；
+  <br />
+  坐标北京，{workingYears}年工作经验，热爱开源，喜欢尝试新技术。
+  <ul>
+    <li>
+      前端：目前主要使用 React，个人兴趣驱使下，在研究
+      <a href='https://www.harmonyos.com' target='_blank'>鸿蒙开发</a>。
+    </li>
+    <li>后端：目前主要使用 Nestjs 和 rust 做服务开发。</li>
+    <li>数据库：目前主要在用 PostgreSQL 和 MongoDB。</li>
+    <li>服务：近几年一直在用 Docker、Kubernetes 部署服务。</li>
+  </ul>
+
+  <div>
+    <img src='/assets/dev.svg' class='mx-auto sm:w-1/2' alt='coding dev illustration' />
+  </div>
+
+  以下是我的几个想法，及想做的东西:
+  <ul>
+    <li>💡 2D低代码游戏开发平台，暂时叫它 Dimo</li>
+    <li>💡 Polona-低代码数据可视化平台</li>
+    <li>💡 鸿蒙应用：心语记账App</li>
+  </ul>
+</AboutLayout>

@@ -5,7 +5,7 @@ export default {
     'eslint --fix --color --cache --cache-location "./node_modules/.cache/eslint/"',
     'prettier --write --cache',
   ],
-  '*.{ts,js,json}': [
+  '*.{ts?(x),js,json}': [
     //
     'eslint --fix --color --cache --cache-location "./node_modules/.cache/eslint/"',
     'prettier --write --cache',

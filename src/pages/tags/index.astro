@@ -1,0 +1,25 @@
+---
+import { getCollection } from 'astro:content';
+
+import Footer from '@components/Footer.astro';
+import Header from '@components/Header.astro';
+import Tag from '@components/Tag.astro';
+import { SITE } from '@config';
+import Layout from '@layouts/Layout.astro';
+import Main from '@layouts/Main.astro';
+import getUniqueTags from '@utils/getUniqueTags';
+
+const posts = await getCollection('blog');
+
+let tags = getUniqueTags(posts);
+---
+
+<Layout title={`标签 | ${SITE.title}`}>
+  <Header activeNav='tags' />
+  <Main pageTitle='🏷️ 标签' pageDesc='文章中使用的所有标签'>
+    <ul>
+      {tags.map(({ tag }) => <Tag {tag} size='lg' />)}
+    </ul>
+  </Main>
+  <Footer />
+</Layout>

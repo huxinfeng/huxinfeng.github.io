@@ -1,6 +1,7 @@
 import eslintPluginJs from '@eslint/js';
 import stylisticEslintPlugin from '@stylistic/eslint-plugin';
 import eslintPluginAstro from 'eslint-plugin-astro';
+import eslintPluginReact from 'eslint-plugin-react';
 import globals from 'globals';
 import typescriptEslint from 'typescript-eslint';
 
@@ -15,6 +16,15 @@ export default [
   eslintPluginJs.configs.recommended,
   // TypeScript 代码的检查
   ...typescriptEslint.configs.recommended,
+  // tsx 代码的检查
+  {
+    files: ['src/**/*.tsx'],
+    ...eslintPluginReact.configs.flat.recommended,
+    rules: {
+      ...eslintPluginReact.configs.flat.recommended.rules,
+      'react/react-in-jsx-scope': 'off',
+    },
+  },
   // astro 规则检查
   ...eslintPluginAstro.configs.recommended,
   {
@@ -24,7 +34,7 @@ export default [
   },
   {
     name: `${projectName}/src`,
-    files: ['src/**/*.ts', 'public/**/*.js'],
+    files: ['src/**/*.astro', 'src/**/*.ts', 'src/**/*.tsx', 'public/**/*.js'],
     languageOptions: { globals: globals.browser },
     plugins: { '@stylistic': stylisticEslintPlugin },
   },
