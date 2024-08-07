@@ -1,0 +1,8 @@
+{
+  "editor.rulers": [150],
+  "editor.codeActionsOnSave": {
+    "source.fixAll.stylelint": "explicit",
+    "source.organizeImports": "explicit"
+  },
+  "stylelint.validate": ["astro", "css"]
+}
