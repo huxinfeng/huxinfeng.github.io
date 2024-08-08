@@ -9,6 +9,7 @@
     "build": "astro check && astro build",
     "preview": "astro preview",
     "astro": "astro",
+    "discussions-process-posts": "pnpx tsx scripts/discussions-process-posts.ts",
     "prepare": "husky"
   },
   "dependencies": {
@@ -32,6 +33,7 @@
     "@astrojs/tailwind": "^5.1.0",
     "@commitlint/cli": "^19.4.0",
     "@eslint/js": "^9.8.0",
+    "@octokit/graphql": "^8.1.1",
     "@stylistic/eslint-plugin": "^2.6.1",
     "@types/react": "^18.3.3",
     "conventional-changelog-conventionalcommits": "^8.0.0",

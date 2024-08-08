@@ -1,0 +1,74 @@
+# discussions 触发以下操作 [created, edited, deleted, pinned, unpinned, labeled, unlabeled, category_changed] 时，生成文章并且发布至 Github Pages 和 Cloudflare Pages
+
+name: Discussions Process Posts Deploy
+
+on:
+  discussion:
+    types: [created, edited, deleted, pinned, unpinned, labeled, unlabeled, category_changed]
+
+jobs:
+  discussions-process-posts:
+    name: Discussions Process Posts
+    if: contains(fromJson('["announcements", "html", "css", "javascript", "canvas", "node", "数据库", "运维", "算法"]'),github.event.discussion.category.slug)
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: setup Node.js environment
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.node-version'
+
+      - name: enable pnpm
+        run: corepack enable
+
+      - name: cache node_modules
+        id: cache_node_modules
+        uses: actions/cache@v4
+        with:
+          path: ./node_modules/
+          key: ${{ runner.os }}-node_modules-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: ${{ runner.os }}-node_modules-
+
+      - name: install dependencies
+        if: steps.cache_node_modules.outputs.cache-hit != 'true'
+        run: pnpm install --frozen-lockfile
+
+      - name: discussions process posts payload
+        run: pnpm run discussions-process-posts "${{ github.event_path }}"
+
+      - name: cache posts
+        id: cache_posts
+        uses: actions/cache@v4
+        with:
+          path: ./src/content/blog/
+          key: ${{ runner.os }}-cache_posts-${{ hashFiles('src/content/blog/**/*.md') }}
+          restore-keys: ${{ runner.os }}-cache_posts-
+
+      - name: build astro
+        run: pnpm run build
+
+      - name: artifact build astro
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./dist/
+
+  deploy-github:
+    name: Deploy Github
+    needs: discussions-process-posts
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      pages: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: deploy to gitHub pages
+        id: deployment
+        uses: actions/deploy-pages@v4
