@@ -107,6 +107,6 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
-          projectName: ${{ github.event.repository.name }}
+          projectName: huxinfeng-github-io
           directory: ${{ env.BUILD_DIRECTORY }}
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
