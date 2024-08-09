@@ -43,9 +43,6 @@ jobs:
         if: steps.cache_node_modules.outputs.cache-hit != 'true'
         run: pnpm install --frozen-lockfile
 
-      - name: discussions process posts payload
-        run: pnpm run discussions-process-posts "${{ github.event_path }}"
-
       - name: cache posts
         id: cache_posts
         uses: actions/cache@v4
@@ -53,6 +50,9 @@ jobs:
           path: ./src/content/blog/
           key: ${{ runner.os }}-cache_posts-${{ hashFiles('src/content/blog/**/*.md') }}
           restore-keys: ${{ runner.os }}-cache_posts-
+
+      - name: discussions process posts payload
+        run: pnpm run discussions-process-posts "${{ github.event_path }}"
 
       - name: build astro
         run: pnpm run build
