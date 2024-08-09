@@ -6,6 +6,10 @@ on:
   discussion:
     types: [created, edited, deleted, pinned, unpinned, labeled, unlabeled, category_changed]
 
+env:
+  BUILD_DIRECTORY: dist
+  ARTIFACT_NAME: artifact
+
 jobs:
   discussions-process-posts:
     name: Discussions Process Posts
@@ -56,7 +60,8 @@ jobs:
       - name: artifact build astro
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./dist/
+          name: ${{ env.ARTIFACT_NAME }}
+          path: ${{ env.BUILD_DIRECTORY }}
 
   deploy-github:
     name: Deploy Github
@@ -72,3 +77,36 @@ jobs:
       - name: deploy to gitHub pages
         id: deployment
         uses: actions/deploy-pages@v4
+        with:
+          artifact_name: ${{ env.ARTIFACT_NAME }}
+
+  deploy-cloudflare:
+    name: Deploy Cloudflare
+    needs: discussions-process-posts
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      deployments: write
+    environment:
+      name: cloudflare-pages
+      url: ${{ steps.deployment.outputs.url }}
+    steps:
+      - name: download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ env.ARTIFACT_NAME }}
+
+      - name: unzip artifact
+        run: |
+          mkdir -p ${{ env.BUILD_DIRECTORY }}
+          tar -xf artifact.tar -C ${{ env.BUILD_DIRECTORY }}
+
+      - name: deploy to cloudflare pages
+        id: deployment
+        uses: cloudflare/pages-action@v1
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+          projectName: ${{ github.event.repository.name }}
+          directory: ${{ env.BUILD_DIRECTORY }}
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
