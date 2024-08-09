@@ -128,12 +128,19 @@ async function writeDiscussion(repoOwner: string, repoName: string, discussionNu
 
   const lines = discussion.body.split('\r\n');
   const { frontMatter, remaining } = getFrontMatter(lines);
-  if (!frontMatter.title) frontMatter.title = discussion.title;
+  if (!frontMatter.title) frontMatter.title = `'${discussion.title}'`;
   if (!frontMatter.pubDatetime) frontMatter.pubDatetime = discussion.createdAt;
   if (!frontMatter.modDatetime) frontMatter.modDatetime = discussion.updatedAt;
   if (!frontMatter.tags) frontMatter.tags = discussion.labels.nodes.map(label => label.name);
   if (!frontMatter.featured) frontMatter.featured = `${pinnedNumbers.includes(discussionNumber)}`;
-  if (!frontMatter.description) frontMatter.description = remaining[0] ?? discussion.title;
+  if (!frontMatter.description) {
+    const minLen = Math.min(remaining.length, 5);
+    let description = '';
+    for (let i = 0; i < minLen; i++) {
+      description += remaining[i]?.concat('\n');
+    }
+    frontMatter.description = `'${description || discussion.title}'`;
+  }
 
   const result: string[] = [];
   result.push('---');
