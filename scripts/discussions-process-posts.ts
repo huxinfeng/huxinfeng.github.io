@@ -137,7 +137,15 @@ async function writeDiscussion(repoOwner: string, repoName: string, discussionNu
     const minLen = Math.min(remaining.length, 5);
     let description = '';
     for (let i = 0; i < minLen; i++) {
-      description += remaining[i]?.concat('\n');
+      if (i + 1 === minLen) {
+        if (i + 1 < remaining.length) {
+          description += remaining[i]?.concat('...');
+        } else {
+          description += remaining[i];
+        }
+      } else {
+        description += remaining[i]?.concat('\n');
+      }
     }
     frontMatter.description = `'${description || discussion.title}'`;
   }
