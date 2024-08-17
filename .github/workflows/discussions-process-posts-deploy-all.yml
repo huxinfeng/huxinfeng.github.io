@@ -47,6 +47,12 @@ jobs:
       - name: discussions process posts payload
         run: pnpm run discussions-process-posts-all "${{ github.event_path }}"
 
+      - name: save posts
+        uses: actions/cache/save@v4
+        with:
+          path: ./src/content/blog/
+          key: ${{ runner.os }}-cache_posts-all
+
       - name: build astro
         run: pnpm run build
 

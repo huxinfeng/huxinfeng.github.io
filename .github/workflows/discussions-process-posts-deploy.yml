@@ -15,6 +15,8 @@ jobs:
     name: Discussions Process Posts
     if: contains(fromJson('["announcements", "html", "css", "javascript", "canvas", "node", "数据库", "运维", "算法"]'),github.event.discussion.category.slug)
     runs-on: ubuntu-latest
+    permissions:
+      actions: write
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
@@ -43,16 +45,25 @@ jobs:
         if: steps.cache_node_modules.outputs.cache-hit != 'true'
         run: pnpm install --frozen-lockfile
 
-      - name: cache posts
-        id: cache_posts
-        uses: actions/cache@v4
+      - name: restore cached posts
+        uses: actions/cache/restore@v4
         with:
           path: ./src/content/blog/
-          key: ${{ runner.os }}-cache_posts-${{ hashFiles('src/content/blog/**/*.md') }}
-          restore-keys: ${{ runner.os }}-cache_posts-
+          key: ${{ runner.os }}-cache_posts-all
 
       - name: discussions process posts payload
         run: pnpm run discussions-process-posts "${{ github.event_path }}"
+
+      - name: delete cache posts
+        uses: prantlf/delete-cache-action@v3
+        with:
+          key: ${{ runner.os }}-cache_posts-all
+
+      - name: save posts
+        uses: actions/cache/save@v4
+        with:
+          path: ./src/content/blog/
+          key: ${{ runner.os }}-cache_posts-all
 
       - name: build astro
         run: pnpm run build
