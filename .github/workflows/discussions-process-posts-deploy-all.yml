@@ -1,0 +1,105 @@
+name: Discussions Process Posts Deploy ALL
+
+on:
+  workflow_dispatch:
+    inputs:
+      first_discussions_nums:
+        description: 'first discussions nums'
+        required: true
+
+env:
+  BUILD_DIRECTORY: dist
+  ARTIFACT_NAME: artifact
+
+jobs:
+  discussions-process-posts:
+    name: Discussions Process Posts
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      FIRST_DISCUSSIONS_NUMS: ${{ github.event.inputs.first_discussions_nums }}
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: setup Node.js environment
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.node-version'
+
+      - name: enable pnpm
+        run: corepack enable
+
+      - name: cache node_modules
+        id: cache_node_modules
+        uses: actions/cache@v4
+        with:
+          path: ./node_modules/
+          key: ${{ runner.os }}-node_modules-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: ${{ runner.os }}-node_modules-
+
+      - name: install dependencies
+        if: steps.cache_node_modules.outputs.cache-hit != 'true'
+        run: pnpm install --frozen-lockfile
+
+      - name: discussions process posts payload
+        run: pnpm run discussions-process-posts-all "${{ github.event_path }}"
+
+      - name: build astro
+        run: pnpm run build
+
+      - name: artifact build astro
+        uses: actions/upload-pages-artifact@v3
+        with:
+          name: ${{ env.ARTIFACT_NAME }}
+          path: ${{ env.BUILD_DIRECTORY }}
+
+  deploy-github:
+    name: Deploy Github
+    needs: discussions-process-posts
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      pages: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: deploy to gitHub pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+        with:
+          artifact_name: ${{ env.ARTIFACT_NAME }}
+
+  deploy-cloudflare:
+    name: Deploy Cloudflare
+    needs: discussions-process-posts
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      deployments: write
+    environment:
+      name: cloudflare-pages
+      url: ${{ steps.deployment.outputs.url }}
+    steps:
+      - name: download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ env.ARTIFACT_NAME }}
+
+      - name: unzip artifact
+        run: |
+          mkdir -p ${{ env.BUILD_DIRECTORY }}
+          tar -xf artifact.tar -C ${{ env.BUILD_DIRECTORY }}
+
+      - name: deploy to cloudflare pages
+        id: deployment
+        uses: cloudflare/pages-action@v1
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+          projectName: huxinfeng-github-io
+          directory: ${{ env.BUILD_DIRECTORY }}
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
